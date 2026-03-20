@@ -7,6 +7,7 @@ import Products from './pages/Products';
 import Categories from './pages/Categories';
 import Orders from './pages/Orders';
 import Analytics from './pages/Analytics';
+import Banners from './pages/Banners';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+          <Route path="/banners" element={<ProtectedRoute><Banners /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

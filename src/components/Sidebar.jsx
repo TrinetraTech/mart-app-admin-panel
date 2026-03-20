@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, Package, Tag, ShoppingCart,
-  BarChart3, LogOut
+  BarChart3, LogOut, Image as ImageIcon
 } from 'lucide-react';
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
   { to: '/categories', icon: Tag, label: 'Categories' },
   { to: '/orders', icon: ShoppingCart, label: 'Orders' },
   { to: '/analytics', icon: BarChart3, label: 'Analytics' },
+  { to: '/banners', icon: ImageIcon, label: 'Banners' },
 ];
 
 const Sidebar = () => {

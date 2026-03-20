@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
-  const [email, setEmail] = useState('admin@supermart.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -43,8 +43,9 @@ const Login = () => {
               className="form-input"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="admin@supermart.com"
+              placeholder="Email Address"
               required
+              disabled={loading}
             />
           </div>
 
@@ -57,6 +58,7 @@ const Login = () => {
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
               required
+              disabled={loading}
             />
           </div>
 
@@ -64,9 +66,7 @@ const Login = () => {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
 
-          <div className="login-hint">
-            Demo: admin@supermart.com / admin123
-          </div>
+
         </form>
       </div>
     </div>
