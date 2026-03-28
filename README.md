@@ -15,12 +15,14 @@ This is the admin web dashboard for the Spermart application, built with React a
    npm install
    ```
 
-2. **Environment Variables**
-   If there are API URLs or other configurations, create a `.env` file based on the environment requirements. Typically you would add:
+2. **Environment Variables & API Connection**
+   This admin panel communicates with the `expressBackend` through the **Admin API namespace** (`/api/admin`).
+   
+   If you need to configure the API URL manually (for production), set up an `.env` file:
    ```env
-   VITE_API_BASE_URL=http://localhost:5000/api
+   VITE_API_BASE_URL=http://localhost:5000/api/admin
    ```
-   *(Update the URL to match where your `expressBackend` is running.)*
+   *Note:* The Vite local dev server (`vite.config.js`) proxies all `/api` traffic to `http://localhost:5000`, and `src/services/api.js` is set to prefix requests with `/api/admin` natively.
 
 3. **Start the Development Server**
    Run the Vite development server:

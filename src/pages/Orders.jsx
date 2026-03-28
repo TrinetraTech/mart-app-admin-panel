@@ -1,11 +1,21 @@
 import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import api from "../services/api";
-import { Search, Eye, X } from "lucide-react";
+import { Search, Eye, X, MapPin, MessageCircle } from "lucide-react";
 import { DataTable } from "mantine-datatable";
 
 const STATUSES = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
 const fmt = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+
+// Extract lat/lng from address strings like "Name, phone (lat, lng)"
+const parseLatLng = (addr) => {
+  if (!addr) return null;
+  const m = addr.match(/\((-?\d+\.?\d*),\s*(-?\d+\.?\d*)\)/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  const old = addr.match(/Lat:\s*(-?\d+\.?\d*),\s*Lng:\s*(-?\d+\.?\d*)/);
+  if (old && old[1] !== "N/A") return { lat: parseFloat(old[1]), lng: parseFloat(old[2]) };
+  return null;
+};
 
 const StatusBadge = ({ status }) => (
   <span className={`badge badge-${(status || "").toLowerCase()}`}>
@@ -282,10 +292,66 @@ const Orders = () => {
                 <div className="text-sm text-muted">{detailOrder.phone}</div>
               </div>
               <div>
-                <div className="form-label">Delivery Address</div>
-                <div className="text-sm" style={{ marginTop: 4 }}>
-                  {detailOrder.address}
-                </div>
+                <div className="form-label" style={{ marginBottom: 8 }}>Delivery Address</div>
+                {(() => {
+                  // Use stored lat/lng first, fall back to parsing address string for old orders
+                  const lat = detailOrder.lat ?? parseLatLng(detailOrder.address)?.lat ?? null;
+                  const lng = detailOrder.lng ?? parseLatLng(detailOrder.address)?.lng ?? null;
+                  const hasCoords = lat != null && lng != null;
+                  const addressText = detailOrder.address && !detailOrder.address.includes("N/A")
+                    ? detailOrder.address
+                    : `${detailOrder.customerName || "—"} · ${detailOrder.phone || "—"}`;
+                  const mapsUrl = hasCoords
+                    ? `https://maps.google.com/?q=${lat},${lng}`
+                    : null;
+                  const waText = `🚚 Delivery for Order #${String(detailOrder._id).slice(-6).toUpperCase()}\n👤 ${detailOrder.customerName} · ${detailOrder.phone}\n📍 Location: ${mapsUrl || "No GPS available"}`;
+                  const waUrl = `https://wa.me/?text=${encodeURIComponent(waText)}`;
+                  return (
+                    <>
+                      <div className="text-sm" style={{ marginBottom: 8 }}>{addressText}</div>
+                      {hasCoords ? (
+                        <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid var(--border)", marginBottom: 10 }}>
+                          <iframe
+                            title="Delivery Location"
+                            width="100%"
+                            height="200"
+                            frameBorder="0"
+                            scrolling="no"
+                            style={{ display: "block" }}
+                            src={`https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.005},${lat - 0.005},${lng + 0.005},${lat + 0.005}&layer=mapnik&marker=${lat},${lng}`}
+                          />
+                        </div>
+                      ) : (
+                        <div className="text-sm text-muted" style={{ marginBottom: 10 }}>
+                          <MapPin size={13} style={{ marginRight: 4, verticalAlign: "middle" }} />
+                          No GPS coordinates for this order
+                        </div>
+                      )}
+                      <div style={{ display: "flex", gap: 8 }}>
+                        {mapsUrl && (
+                          <a
+                            href={mapsUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn btn-sm btn-ghost"
+                            style={{ display: "flex", alignItems: "center", gap: 6 }}
+                          >
+                            <MapPin size={13} /> Open in Maps
+                          </a>
+                        )}
+                        <a
+                          href={waUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-sm"
+                          style={{ display: "flex", alignItems: "center", gap: 6, background: "#25D366", color: "#fff", border: "none" }}
+                        >
+                          <MessageCircle size={13} /> Share on WhatsApp
+                        </a>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
               <div>
                 <div className="form-label" style={{ marginBottom: 8 }}>
@@ -302,10 +368,10 @@ const Orders = () => {
                     }}
                   >
                     <span className="text-sm">
-                      {item.name} × {item.qty}
+                      {item.name || item.product?.name || "Unknown Item"} × {item.qty ?? 1}
                     </span>
                     <span className="text-sm font-semibold">
-                      {fmt(item.price * item.qty)}
+                      {fmt((item.price ?? item.product?.price ?? 0) * (item.qty ?? 1))}
                     </span>
                   </div>
                 ))}
