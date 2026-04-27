@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://martapi.anshvarma.in/api/admin',
+  // baseURL: 'https://martapi.anshvarma.in/api/admin', // for live
+  baseURL: '/api/admin', // for local
 });
 
 api.interceptors.request.use((config) => {
